@@ -31,11 +31,33 @@ services:
       - "POSTGRES_USER=$POSTGRES_USER"
       - "POSTGRES_DB=$POSTGRES_DB"
       - "POSTGRES_PASSWORD=$POSTGRES_PASSWORD"
-
+  pgbackups:
+    image: prodrigestivill/postgres-backup-local
+    restart: always
+    networks:
+      - lime-network
+    volumes:
+      - abs-backup:/backups
+    links:
+      - lime-db
+    depends_on:
+      - lime-db
+    environment:
+      - POSTGRES_HOST=lime-db
+      - POSTGRES_DB=$POSTGRES_DB
+      - POSTGRES_USER=$POSTGRES_USER
+      - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+      - POSTGRES_EXTRA_OPTS=-Z6 --schema=public --blobs
+      - SCHEDULE=@daily
+      - BACKUP_KEEP_DAYS=7
+      - BACKUP_KEEP_WEEKS=4
+      - BACKUP_KEEP_MONTHS=6
+      - HEALTHCHECK_PORT=8080
 volumes:
   abs-db:
   abs-surveys:
-
+  abs-backup:
+    external: true
 networks:
   lan:
     name: lan-network
