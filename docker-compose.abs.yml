@@ -8,6 +8,8 @@ services:
     volumes:
       # Hint: This is just an example, change /tmp to something persistent
       - abs-surveys:/var/www/html/upload/surveys
+    networks:
+      - lan
     links:
       - lime-db
     depends_on:
@@ -30,3 +32,9 @@ services:
 volumes:
   abs-db:
   abs-surveys:
+
+networks:
+  lan:
+    name: lan-network
+    external: true
+    
