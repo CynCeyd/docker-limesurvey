@@ -10,6 +10,7 @@ services:
       - abs-surveys:/var/www/html/upload/surveys
     networks:
       - lan
+      - lime-network
     links:
       - lime-db
     depends_on:
@@ -24,6 +25,8 @@ services:
     image: docker.io/postgres:10
     volumes:
       - abs-db:/var/lib/postgresql/data
+    networks:
+      - lime-network
     environment:
       - "POSTGRES_USER=$POSTGRES_USER"
       - "POSTGRES_DB=$POSTGRES_DB"
@@ -37,4 +40,4 @@ networks:
   lan:
     name: lan-network
     external: true
-    
+  lime-network:
