@@ -1,0 +1,32 @@
+version: "3.0"
+services:
+  limesurvey:
+    build:
+      # Hint: Change it to 3.0/apache/ if you want to use LimeSurvey 3.*
+      context: 6.0/apache/
+      dockerfile: Dockerfile
+    volumes:
+      # Hint: This is just an example, change /tmp to something persistent
+      - abs-surveys:/var/www/html/upload/surveys
+    links:
+      - lime-db
+    depends_on:
+      - lime-db
+    environment:
+      - "DB_TYPE=pgsql"
+      - "DB_PORT=$POSTGRES_PORT"
+      - "DB_HOST=lime-db"
+      - "DB_PASSWORD=$POSTGRES_PASSWORD"
+      - "ADMIN_PASSWORD=$ADMIN_PASSWORD"
+  lime-db:
+    image: docker.io/postgres:10
+    volumes:
+      - abs-db:/var/lib/postgresql/data
+    environment:
+      - "POSTGRES_USER=$POSTGRES_USER"
+      - "POSTGRES_DB=$POSTGRES_DB"
+      - "POSTGRES_PASSWORD=$POSTGRES_PASSWORD"
+
+volumes:
+  abs-db:
+  abs-surveys:
