@@ -37,7 +37,7 @@ services:
     networks:
       - lime-network
     volumes:
-      - abs-backup:/backups
+      - /mnt/abs-backup:/backups
     links:
       - lime-db
     depends_on:
@@ -56,8 +56,6 @@ services:
 volumes:
   abs-db:
   abs-surveys:
-  abs-backup:
-    external: true
 networks:
   lan:
     name: lan-network
