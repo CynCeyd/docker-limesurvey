@@ -46,7 +46,5 @@ networks:
 secrets:
   db_password:
     file: db_password.txt
-  db_root_password:
-    file: db_root_password.txt
   admin_password:
     file: admin_password.txt
