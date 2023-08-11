@@ -9,42 +9,69 @@ services:
       # Hint: This is just an example, change /tmp to something persistent
       - abs-surveys:/var/www/html/upload/surveys
     networks:
-      - lime-network
       - proxy
+      - lime-network
     links:
-      - mariadb
+      - lime-db
     depends_on:
-      - mariadb
+      - lime-db
     environment:
-      - "DB_TYPE=mysql"
-      - "DB_PORT=3306"
-      - "DB_HOST=mariadb"
-      - "DB_USER=limesurvey"
+      - "DB_TYPE=pgsql"
+      - "DB_PORT=5432"
+      - "DB_HOST=lime-db"
       - "DB_PASSWORD=/run/secrets/db_password"
       - "ADMIN_PASSWORD=/run/secrets/admin_password"
     secrets:
       - db_password
       - admin_password
-  mariadb:
-    image: mariadb
+  lime-db:
+    image: docker.io/postgres:10
+    volumes:
+      - abs-db:/var/lib/postgresql/data
+    networks:
+      - lime-network
     environment:
-      - "MARIADB_DATABASE=limesurvey"
-      - "MARIADB_USER=limesurvey"
-      - MARIADB_PASSWORD=/run/secrets/db_password
-      - MARIADB_ROOT_PASSWORD=/run/secrets/db_root_password
+      - "POSTGRES_USER=limesurvey"
+      - "POSTGRES_DB=limesurvey"
+      - "POSTGRES_PASSWORD=/run/secrets/db_password"
     secrets:
       - db_password
       - db_root_password
+  pgbackups:
+    image: prodrigestivill/postgres-backup-local
+    restart: always
     networks:
       - lime-network
+    volumes:
+      - /mnt/abs-backup:/backups
+    links:
+      - lime-db
+    depends_on:
+      - lime-db
+    environment:
+      - POSTGRES_HOST=lime-db
+      - POSTGRES_DB=limesurvey
+      - POSTGRES_USER=limesurvey
+      - POSTGRES_PASSWORD=/run/secrets/db_password
+      - POSTGRES_EXTRA_OPTS=-Z6 --schema=public --blobs
+      - SCHEDULE=@daily
+      - BACKUP_KEEP_DAYS=7
+      - BACKUP_KEEP_WEEKS=4
+      - BACKUP_KEEP_MONTHS=6
+      - HEALTHCHECK_PORT=8080
+    secrets:
+      - db_password
+      - db_root_password
 volumes:
   abs-db:
   abs-surveys:
 networks:
   proxy:
+    name: proxy
     external: true
   lime-network:
 
+  
 secrets:
   db_password:
     file: db_password.txt
