@@ -30,8 +30,10 @@ services:
       - "MARIADB_DATABASE=limesurvey"
       - "MARIADB_USER=limesurvey"
       - MARIADB_PASSWORD=/run/secrets/db_password
+      - MARIADB_ROOT_PASSWORD=/run/secrets/db_root_password
     secrets:
       - db_password
+      - db_root_password
     networks:
       - lime-network
 volumes:
@@ -45,5 +47,7 @@ networks:
 secrets:
   db_password:
     file: db_password.txt
+  db_root_password:
+    file: db_root_password.txt
   admin_password:
     file: admin_password.txt
