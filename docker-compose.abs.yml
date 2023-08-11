@@ -9,55 +9,44 @@ services:
       # Hint: This is just an example, change /tmp to something persistent
       - abs-surveys:/var/www/html/upload/surveys
     networks:
-      - lan
       - lime-network
+      - proxy
     links:
-      - lime-db
+      - mariadb
     depends_on:
-      - lime-db
+      - mariadb
     environment:
-      - "DB_TYPE=pgsql"
-      - "DB_PORT=$POSTGRES_PORT"
-      - "DB_HOST=lime-db"
-      - "DB_PASSWORD=$POSTGRES_PASSWORD"
-      - "ADMIN_PASSWORD=$ADMIN_PASSWORD"
-  lime-db:
-    image: docker.io/postgres:10
-    volumes:
-      - abs-db:/var/lib/postgresql/data
+      - "DB_TYPE=mysql"
+      - "DB_PORT=3306"
+      - "DB_HOST=mariadb"
+      - "DB_PASSWORD=/run/secrets/db_password"
+      - "ADMIN_PASSWORD=/run/secrets/admin_password"
+    secrets:
+      - db_password
+      - admin_password
+  mariadb:
+    image: mariadb
+    environment:
+      - "MARIADB_DATABASE=limesurvey"
+      - "MARIADB_USER=limesurvey"
+      - MARIADB_PASSWORD=/run/secrets/db_password
+    secrets:
+      - db_password
+      - db_root_password
     networks:
       - lime-network
-    environment:
-      - "POSTGRES_USER=$POSTGRES_USER"
-      - "POSTGRES_DB=$POSTGRES_DB"
-      - "POSTGRES_PASSWORD=$POSTGRES_PASSWORD"
-  pgbackups:
-    image: prodrigestivill/postgres-backup-local
-    restart: always
-    networks:
-      - lime-network
-    volumes:
-      - /mnt/abs-backup:/backups
-    links:
-      - lime-db
-    depends_on:
-      - lime-db
-    environment:
-      - POSTGRES_HOST=lime-db
-      - POSTGRES_DB=$POSTGRES_DB
-      - POSTGRES_USER=$POSTGRES_USER
-      - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
-      - POSTGRES_EXTRA_OPTS=-Z6 --schema=public --blobs
-      - SCHEDULE=@daily
-      - BACKUP_KEEP_DAYS=7
-      - BACKUP_KEEP_WEEKS=4
-      - BACKUP_KEEP_MONTHS=6
-      - HEALTHCHECK_PORT=8080
 volumes:
   abs-db:
   abs-surveys:
 networks:
-  lan:
-    name: lan-network
+  proxy:
     external: true
   lime-network:
+
+secrets:
+  db_password:
+    file: db_password.txt
+  db_root_password:
+    file: db_root_password.txt
+  admin_password:
+    file: admin_password.txt
