@@ -19,6 +19,7 @@ services:
       - "DB_TYPE=mysql"
       - "DB_PORT=3306"
       - "DB_HOST=mariadb"
+      - "DB_USER=limesurvey"
       - "DB_PASSWORD=/run/secrets/db_password"
       - "ADMIN_PASSWORD=/run/secrets/admin_password"
     secrets:
